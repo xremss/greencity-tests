@@ -1,48 +1,26 @@
-import unittest
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support import expected_conditions as EC
+import allure
+from data.config import Config
+from src.pages.base_page import BasePage
+import time
 
-BASE_URL = "https://www.greencity.cx.ua/#/greenCity/events"  # replace with your URL
 
-class AuthTests(unittest.TestCase):
-
-    def setUp(self):
-        options = Options()
-        options.add_argument("--headless=new")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-
-        self.driver = webdriver.Chrome(options=options)
-        self.driver.maximize_window()
-        self.wait = WebDriverWait(self.driver, 10)
-        self.driver.get(BASE_URL)
-
-    def tearDown(self):
-        self.driver.quit()
-
-    # Test Case 1: Successful Sign Up
-    def test_successful_sign_up(self):
-        driver = self.driver
-        wait = self.wait
-
-        # Open Sign Up popup
-        wait.until(EC.element_to_be_clickable((By.XPATH, "//div[@class='header_sign-up-btn']"))).click()
-
-        # Fill form
-        wait.until(EC.visibility_of_element_located((By.ID, "email"))).send_keys("test1234qwer@gmail.com")
-        driver.find_element(By.ID, "firstName").send_keys("testuser")
-        driver.find_element(By.ID, "password").send_keys("12345678Qw!")
-        driver.find_element(By.ID, "repeatPassword").send_keys("12345678Qw!")
-
-        # Submit
-        driver.find_element(By.XPATH, "//button[@class='greenStyle']").click()
-
-        # Assert success message
-        success_msg = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".mat-mdc-snack-bar-actions.mdc-snackbar__actions")))
-        self.assertTrue(success_msg.is_displayed())
-
-if __name__ == "__main__":
-    unittest.main()
+@allure.title("Test Sign Up Modal - Successful Sign Up")
+@allure.description("Test the Sign Up functionality with valid credentials.")
+@allure.tag("Sign Up", "Smoke", "Authentication")
+@allure.severity(allure.severity_level.CRITICAL)
+def test_signup_successfully(init_driver):
+    # Generate unique email with timestamp
+    unique_email = f"{Config.EMAIL.split('@')[0]}_{int(time.time())}@{Config.EMAIL.split('@')[1]}"
+    
+    with allure.step("Open the application and click on Sign Up button"):
+        page = BasePage(init_driver)
+        signup_modal = page.click_sign_up()
+        assert signup_modal.wait_until_displayed(), "Sign Up modal is not displayed"
+    with allure.step("Enter valid credentials and attempt to sign up"):
+        signup_modal.enter_email(unique_email)
+        signup_modal.enter_username(Config.USER_NAME)
+        signup_modal.enter_password(Config.PASSWORD)
+        signup_modal.enter_repeat_password(Config.PASSWORD)
+        signup_modal.click_sign_up()
+    with allure.step("Verify that the sign-up modal disappears after successful registration"):
+        assert signup_modal.wait_until_it_disappears(timeout=Config.EXPLICIT_WAIT_TIMEOUT), "Sign Up modal should disappear after successful sign up"
