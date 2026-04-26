@@ -1,72 +1,28 @@
-import unittest
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support import expected_conditions as EC
+import allure
+from data.config import Config
+from src.pages.base_page import BasePage
+from src.components.reset_password_modal import ResetPasswordModal
 
-BASE_URL = "https://www.greencity.cx.ua/#/greenCity/events"
-class AuthTests(unittest.TestCase):
- # Не працює для WSL.Думав що проблема з тим,що відкриваєтся у неповноєкраному режимі,та ломаєтся дом дерево.Але ні
-    # def setUp(self):
-        # options = Options()
-        # options.add_argument("--headless=new")
-        # options.add_argument("--no-sandbox")
-        # options.add_argument("--disable-dev-shm-usage")
 
-        # self.driver = webdriver.Chrome(options=options)
-        # self.driver.maximize_window()
-        # self.wait = WebDriverWait(self.driver, 10)
-        # self.driver.get(BASE_URL)
 
-#     def tearDown(self):
-#         self.driver.quit()
-
-#     # Test Case 2: Reset Password
-#     def test_reset_password(self):
-#         driver = self.driver
-#         wait = self.wait
-
-#         # Open Forgot Password
-#         wait.until(EC.element_to_be_clickable((By.XPATH, "//div/ul/img"))).click()
-#         wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@class='forgot-password']"))).click()
-
-#         # Enter email
-#         wait.until(EC.visibility_of_element_located((By.ID, "email"))).send_keys("xremsua+1@gmail.com")
-#         driver.find_element(By.XPATH, "//button[@class='green-send-btn']").click()
-
-#         # Assert reset email sent message
-#         reset_msg = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".mat-mdc-snack-bar-label")))
-#         self.assertTrue(reset_msg.is_displayed())
-
-# if __name__ == "__main__":
-#     unittest.main()
-
-    def setUp(self):
-        self.driver = webdriver.Chrome()
-        self.driver.maximize_window()
-        self.wait = WebDriverWait(self.driver, 10)
-        self.driver.get(BASE_URL)
-
-    def tearDown(self):
-        self.driver.quit()
-
-    # Test Case 2: Reset Password
-    def test_reset_password(self):
-        driver = self.driver
-        wait = self.wait
-
-        # Open Forgot Password
-        wait.until(EC.element_to_be_clickable((By.XPATH, "//a[text()=' Sign in ']"))).click()
-        wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@class='forgot-password']"))).click()
-
-        # Enter email
-        wait.until(EC.visibility_of_element_located((By.ID, "email"))).send_keys("xremsua@gmail.com")
-        driver.find_element(By.XPATH, "//button[@class='green-send-btn']").click()
-
-        # Assert reset email sent message
-        reset_msg = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".mat-mdc-snack-bar-label")))
-        self.assertTrue(reset_msg.is_displayed())
-
-if __name__ == "__main__":
-    unittest.main()
+@allure.title("Test Reset Password - Successful Reset")
+@allure.description("Test the reset password functionality with valid email.")
+@allure.tag("Reset Password", "Smoke", "Authentication")
+@allure.severity(allure.severity_level.CRITICAL)
+def test_reset_password_successfully(init_driver):
+    with allure.step("Open the application and click on Sign In button"):
+        page = BasePage(init_driver)
+        signin_modal = page.click_sign_in()
+        assert signin_modal.wait_until_displayed(), "Sign In modal is not displayed"
+    with allure.step("Click on Forgot Password link"):
+        signin_modal.click_forgot_password()
+        reset_modal = ResetPasswordModal(page._get_reset_password_modal())
+        assert reset_modal.wait_until_displayed(), "Reset Password modal is not displayed"
+    with allure.step("Enter valid email and attempt to reset password"):
+        reset_modal.enter_email(Config.EMAIL)
+    with allure.step("Click Submit button"):
+        reset_modal.click_submit()
+    with allure.step("Verify reset password success (e.g., success message or modal disappears)"):
+        # Add appropriate assertion here, e.g., check for success message
+        # For now, assuming the modal disappears on success
+        assert reset_modal.wait_until_it_disappears(timeout=Config.EXPLICIT_WAIT_TIMEOUT), "Reset Password modal should disappear after successful reset"

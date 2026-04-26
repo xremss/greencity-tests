@@ -4,15 +4,15 @@ from .base_component import BaseComponent
 from selenium.webdriver.support import expected_conditions as EC
 from data.config import Config
 
-class SignupModal(BaseComponent):
+class SigninModal(BaseComponent):
+
     email = (By.ID, "email")
-    first_name = (By.ID, "firstName")
     password = (By.ID, "password")
-    repeat_password = (By.ID, "repeatPassword")
-    sign_up_button = (By.XPATH, "//button[@type='submit']")
-    sign_up_with_google_button = (By.CLASS_NAME, "google-sign-in")
-    sign_in_button = (By.XPATH, '//a[contains(text(), "Sign in")]')
-    close_button = (By.CLASS_NAME, "cross-btn")
+    forgot_password = (By.CLASS_NAME, "forgot-password")
+    sign_in_button = (By.XPATH, "//app-sign-in//button[@type='submit']")
+    sign_in_with_google_button = (By.CLASS_NAME, "google-sign-in")
+    sign_up_button = (By.XPATH, '//a[contains(text(), "Sign up")]')
+    close_button = (By.CLASS_NAME, "close-modal-window")
     email_error = (By.ID, "email-err-msg")
     password_error = (By.ID, "pass-err-msg")
 
@@ -22,33 +22,21 @@ class SignupModal(BaseComponent):
         email_field.clear()
         email_field.send_keys(email)
 
-    @allure.step("Enter username: {first_name}")
-    def enter_username(self, first_name):
-        username_field = self.find_element(*self.first_name)
-        username_field.clear()
-        username_field.send_keys(first_name)
-
     @allure.step("Enter password")
     def enter_password(self, password):
         password_field = self.find_element(*self.password)
         password_field.clear()
         password_field.send_keys(password)
 
-    @allure.step("Enter repeat password")
-    def enter_repeat_password(self, repeat_password):
-        repeat_password_field = self.find_element(*self.repeat_password)
-        repeat_password_field.clear()
-        repeat_password_field.send_keys(repeat_password)
-
     @allure.step("Click Forgot Password link")
     def click_forgot_password(self):
         forgot_password_link = self.find_element(*self.forgot_password)
         forgot_password_link.click()
 
-    @allure.step("Click Sign Up button")
-    def click_sign_up(self):
-        sign_up_btn = self.find_element(*self.sign_up_button)
-        sign_up_btn.click()
+    @allure.step("Click Sign In button")
+    def click_sign_in(self):
+        sign_in_btn = self.find_element(*self.sign_in_button)
+        sign_in_btn.click()
 
     @allure.step("wait until email is not displayed")
     def wait_until_it_disappears(self, timeout=Config.EXPLICIT_WAIT_TIMEOUT):
@@ -70,7 +58,7 @@ class SignupModal(BaseComponent):
         except:
             return False
 
-    @allure.step("Check if Sign Up modal is displayed")
+    @allure.step("Check if Sign In modal is displayed")
     def is_displayed(self):
         return self.node.is_displayed()
 
