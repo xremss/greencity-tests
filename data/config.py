@@ -14,3 +14,5 @@ class Config:
     PASSWORD = os.getenv("PASSWORD")
     USER_NAME = os.getenv("USER_NAME")
     HEADLESS_MODE = os.getenv("HEADLESS_MODE", "True").lower() in ("true", "1", "t")
+    INVALID_EMAIL = os.getenv("INVALID_EMAIL")
+    INVALID_PASSWORD = os.getenv("INVALID_PASSWORD")

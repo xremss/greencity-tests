@@ -73,3 +73,7 @@ class SigninModal(BaseComponent):
     @allure.step("Check if email error message is displayed")
     def email_error_is_displayed(self):
         return self.find_element(*self.email_error).is_displayed()
+    
+    @allure.step("Check if password error message is displayed")
+    def password_error_is_displayed(self):
+        return self.find_element(*self.password_error).is_displayed()
